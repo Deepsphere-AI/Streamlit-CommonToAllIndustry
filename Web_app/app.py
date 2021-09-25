@@ -73,6 +73,12 @@ vAR_st.markdown("""
 
 
 
+# def local_css(file_name):
+#     with open(file_name) as f:
+#         vAR_st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
+# local_css("style.css")
+
+
 def training(method):
 
   #training dataset
@@ -403,7 +409,7 @@ def visual_3(data):
   fig = go.Figure(
     data=[go.Bar(name='gender', x=data['Gender'], y=data['Churn Prediction'])],
     layout=go.Layout(
-      title=go.layout.Title(text="A Figure Specified By A Graph Object")))
+      title=go.layout.Title(text="Customer Churn Distribution by Gender")))
   vAR_st.plotly_chart(fig)
 
 
