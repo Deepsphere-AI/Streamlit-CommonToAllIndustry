@@ -16,23 +16,21 @@ import plotly.graph_objects as go
 #for Setting the page layout to wide
 vAR_st.set_page_config(layout="wide")
 
-#for having the logo and title in the same line we use vAR.st_beta_columns() and make the ratio accordingly 
-vAR_logo, vAR_title = vAR_st.columns((6,50))
-with vAR_logo:
-  vAR_st.image('https://raw.githubusercontent.com/DeepsphereAI/Streamlit-CommonToAllIndustry/master/Web_app/logo.jpg', width = 150)
-with vAR_title:
+col1, col2, col3 = vAR_st.columns([3,5,3])
+with col2:
+  vAR_st.image('https://raw.githubusercontent.com/tarun243/Streamlit-commonToAllIndustry/master/Web_app/Logo_final.png')
+
 #setting font size and colour for the title 
-  
 #by this text-align: centre, we can align the title to the centre of the page
-  vAR_st.markdown("<h1 style='text-align: center; color: black; font-size:29px;'>Learn to Build Industry Standard Data Science Applications </h1>", unsafe_allow_html=True)
-  vAR_st.write('')
-  vAR_st.markdown("<h1 style='text-align: center; color: blue; font-size:29px;'>Powered by Streamlit and Google Cloud</h1>", unsafe_allow_html=True)
+vAR_st.markdown("<h1 style='text-align: center; color: black; font-size:29px;'>Learn to Build Industry Standard Data Science Applications </h1>", unsafe_allow_html=True)
+vAR_st.markdown("<h1 style='text-align: center; color: blue; font-size:29px;'>Powered by Google Cloud and Streamlit</h1>", unsafe_allow_html=True)
 
 
 
 #for background color of sidebar
 vAR_st.markdown("""<style>.css-17eq0hr {
     background-color: #4c85e4;
+    width: 19rem;
 }
 </style>""", unsafe_allow_html=True)
 
@@ -41,17 +39,23 @@ vAR_st.markdown("""<style>.css-17eq0hr {
 vAR_st.markdown("""<style>#root > div:nth-child(1) > div > div > div > div > section.css-1lcbmhc.e1fqkh3o0 > div.css-17eq0hr.e1fqkh3o1 > div.block-container.css-1gx893w.eknhn3m2 > div:nth-child(1) > div:nth-child(5)  
 {
     background-color:rgb(47 236 106);  
-    top: 200px; 
+    top: 40px; 
     border: 0px solid; 
-    padding: 10px;}
+    padding: 10px;
+    border-radius:3px; }
 </style>""", unsafe_allow_html=True)
 
 
 #for clear/reset button
 vAR_st.markdown("""<style>p, ol, ul, dl {
-    margin: 0px 100px 1rem;
+    margin: 0px 80px 1rem;
     font-size: 1rem;
     font-weight: 400;
+}
+</style>""", unsafe_allow_html=True)
+
+vAR_st.markdown("""<style>a {
+    text-decoration: none;
 }
 </style>""", unsafe_allow_html=True)
 
@@ -68,13 +72,6 @@ div.stButton > button:first-child {border: 1px solid; width: 55%;
 vAR_st.markdown("""
 <hr style="width:100%;height:3px;background-color:gray;border-width:10">
 """, unsafe_allow_html=True)
-
-
-
-# def local_css(file_name):
-#     with open(file_name) as f:
-#         vAR_st.markdown('<style>{}</style>'.format(f.read()), unsafe_allow_html=True)
-# local_css("style.css")
 
 
 def training(method):
@@ -398,35 +395,94 @@ def download(method):
   vAR_st.markdown(href,unsafe_allow_html=True)
   
 
-def visual_5(data):
+def visual_6(data):
+  percentage = (cum_churn/60)*100
   fig = go.Figure(
     data=[go.Scatter(
-      x=data['Service Start Date'],
-      y=cum,
-      marker_color='black'
+      x=data['When the Churn Occurs'],
+      y=cum_churn,
+      marker_color='#483D8B'
     )],
+
     layout=go.Layout(
       title=go.layout.Title(text="When the Churn Occurs")))
+  fig.update_xaxes(
+      title_text = "Days",showgrid=False)
+  fig.update_yaxes(
+      title_text = "Percentage of Churn",showgrid=False)
+  fig.update_layout(plot_bgcolor='rgba(0,0,0,1.0)')
   vAR_st.plotly_chart(fig)
 
 
-def visual_4(data):
+def visual_5(data):
+  percentage = (cum_churn/60)*100
   fig = go.Figure(
-    data=[go.Bar(
-      x=data['Reason for The customer to Churn / Non Churn'],
-      y=data['Churn Prediction']
+    data=[go.Scatter(
+      x=data['Service Start Date'],
+      y=cum_churn,
+      marker_color='black'
     )],
     layout=go.Layout(
-      title=go.layout.Title(text="Reason for The Customer Churn")))
+      title=go.layout.Title(text="Churn Trend")))
+  fig.update_xaxes(
+      title_text = "Year")
+  fig.update_yaxes(
+      title_text = "Percentage of Churn")
+
   vAR_st.plotly_chart(fig)
 
 
 def visual_3(data):
-  fig = go.Figure(
-    data=[go.Bar(name='gender', x=data['Gender'], y=data['Churn Prediction'])],
-    layout=go.Layout(
-      title=go.layout.Title(text="Customer Churn Distribution by Gender")))
-  vAR_st.plotly_chart(fig)
+    group = data.groupby('Gender')
+    new_df = group.size().reset_index(name='Count')
+    new_df = new_df.sort_values('Count')
+
+
+    colors = ['lightslategray',] * 2
+    colors[0] = '#1E90FF'
+    colors[1] = '#9400D3'
+    fig = go.Figure()
+
+
+    fig = go.Figure(data=[go.Bar(
+        x=new_df['Gender'],
+        y=new_df['Count'],
+        marker_color=colors
+    )])
+    fig.update_xaxes(
+        title_text = "Gender")
+    fig.update_yaxes(
+        title_text = "Churn Count")
+
+    fig.update_layout(title_text='Customer Churn Count By Gender')
+    vAR_st.plotly_chart(fig)
+
+
+def visual_4(data):
+    group = data.groupby('Reason for The customer to Churn / Non Churn')
+    new_df = group.size().reset_index(name='counts')
+    new_df = new_df.sort_values('counts')
+
+
+    colors = ['lightslategray',] * 3
+    colors[0] = '#00FA9A'
+    colors[1] = '#7B68EE'
+    colors[2] = '#708090'
+    fig = go.Figure()
+
+
+    fig = go.Figure(data=[go.Bar(
+        x=new_df['Reason for The customer to Churn / Non Churn'],
+        y=new_df['counts'],
+        marker_color=colors # marker color can be a single color value or an iterable
+    )])
+    fig.update_xaxes(
+        title_text = "Reason to Churn")
+    fig.update_yaxes(
+        title_text = "Churn Count")
+
+    fig.update_layout(title_text='Customer Churn Count By Reason')
+    vAR_st.plotly_chart(fig)
 
 
 def visual_1(data):
@@ -473,40 +529,39 @@ with col2:
     vAR_st.write('')
     vAR_st.subheader("Problem Statement")
 with col3:
-    vAR_problem = vAR_st.selectbox('',('','Customer Churn: Who is going to churn?','Customer Churn: When will the churn occur?','Customer Churn: Why does the churn occurs?'),index=0)
+    vAR_problem = vAR_st.selectbox('',('Select the Problem Statement','Customer Churn: Who is going to churn?','Customer Churn: When will the churn occur?','Customer Churn: Why does the churn occurs?'),index=0)
 
 
 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col2:
-  if vAR_problem != '':
+  if vAR_problem != 'Select the Problem Statement':
     vAR_st.write('')
     vAR_st.write('')
     vAR_st.subheader("Problem type")
 with col3:
-  if vAR_problem != '':
-    vAR_type = vAR_st.selectbox('',('','Classification','Regression','Clustering','Continued Decision Making'),index=0)
+  if vAR_problem != 'Select the Problem Statement':
+    vAR_type = vAR_st.selectbox('',('Select the Problem type','Classification','Regression','Clustering','Continued Decision Making'),index=0)
 
 
 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col2:
-  if vAR_problem != '':
-    if vAR_type != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
       vAR_st.write('')
       vAR_st.write('')
       vAR_st.subheader("Model Selection")
 with col5:
-  if vAR_problem != '':
-    if vAR_type != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
       vAR_st.write('')
       vAR_st.write('')
       model_selection_source_code = vAR_st.button('Source Code',key='13')
-
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      vAR_model = vAR_st.selectbox('',('','Decision Tree','Random Forest','Logistic Regression','Linear Regression','K Means Clustering'),index=0)
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      vAR_model = vAR_st.selectbox('',('Select the Model','Decision Tree','Random Forest','Logistic Regression','Linear Regression','K Means Clustering'),index=0)
       if model_selection_source_code:
         if vAR_model == 'Decision Tree':
           with vAR_st.echo():
@@ -549,21 +604,21 @@ with col3:
 vAR_st.write('')
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col2:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         vAR_st.write('')
         vAR_st.write('')
         vAR_st.subheader("Training Dataset")
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         vAR_training_data = vAR_st.file_uploader("Upload CSV file")
 with col5:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data is not None:
           if vAR_training_data.type == 'application/vnd.ms-excel':
             df_training = pd.read_csv(vAR_training_data, encoding = 'unicode_escape',error_bad_lines=False)
@@ -582,18 +637,18 @@ with col5:
 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data is not None:
           if vAR_training_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
             full_table_1 = vAR_st.button('Click for all Set of rows')
 
 
 
-if vAR_problem != '':
-  if vAR_type != '':
-    if vAR_model != '':
+if vAR_problem != 'Select the Problem Statement':
+  if vAR_type != 'Select the Problem type':
+    if vAR_model != 'Select the Model':
       if vAR_training_data is not None:
         if vAR_training_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
           if preview_training:
@@ -609,23 +664,23 @@ if vAR_problem != '':
 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col2:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           vAR_st.subheader("Feature Engineering")
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           vAR_st.write('')
           button_feature = vAR_st.button('Extract Feature')
           vAR_st.write('')
 with col5:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           vAR_st.write('')
           feature_source_code = vAR_st.button('Source Code',key='12')
@@ -634,46 +689,44 @@ with col5:
 
 col1, col2, col3, col4, col5= vAR_st.columns([0.25,1.5,3.5,5,0.5])
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if button_feature:
             features = df_training.drop(['CustomerID','Churn'], axis =1)
             for i in range(len(features.columns)):
               vAR_st.write('Feature ',i+1)    
 with col4:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if button_feature:
             feature()
 
-if vAR_problem != '':
-  if vAR_type != '':
-    if vAR_model != '':
+
+if vAR_problem != 'Select the Problem Statement':
+  if vAR_type != 'Select the Problem type':
+    if vAR_model != 'Select the Model':
       if vAR_training_data:
         if feature_source_code:
           feature_code()
 
 
 
-
-
 vAR_st.write('') 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col2:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
-
           vAR_st.subheader("Model Engineering")
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           vAR_st.write('')
           button_train = vAR_st.button('Train the Model')
@@ -690,9 +743,9 @@ with col3:
               training(method)
             vAR_success = vAR_st.success('Model training completed')
 with col5:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           vAR_st.write('')
           train_source_code = vAR_st.button('Source Code',key="10")
@@ -700,9 +753,9 @@ with col5:
 
 
 #to display traning code
-if vAR_problem != '':
-  if vAR_type != '':
-    if vAR_model != '':
+if vAR_problem != 'Select the Problem Statement':
+  if vAR_type != 'Select the Problem type':
+    if vAR_model != 'Select the Model':
       if vAR_training_data:
         if train_source_code:
           if vAR_model == "Logistic Regression":
@@ -716,9 +769,9 @@ if vAR_problem != '':
 vAR_st.write('')
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col2:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           #time.sleep(10)
           vAR_st.write('')
@@ -726,16 +779,16 @@ with col2:
           vAR_st.markdown('#')
           vAR_st.subheader('Model Engineering')
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           vAR_st.subheader('Test the Model')
           vAR_testing_data = vAR_st.file_uploader("upload CSV file")
 with col5:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if vAR_testing_data is not None:
             if vAR_testing_data.type == 'application/vnd.ms-excel':
@@ -758,9 +811,9 @@ with col5:
 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if vAR_testing_data is not None:
             if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 
@@ -769,9 +822,9 @@ with col3:
 
 
 
-if vAR_problem != '':
-  if vAR_type != '':
-    if vAR_model != '':
+if vAR_problem != 'Select the Problem Statement':
+  if vAR_type != 'Select the Problem type':
+    if vAR_model != 'Select the Model':
       if vAR_training_data:
         if vAR_testing_data is not None:
           if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -788,9 +841,9 @@ if vAR_problem != '':
 
 col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
 with col3:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if vAR_testing_data is not None:
             if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 
@@ -799,9 +852,9 @@ with col3:
                 vAR_st.image('https://i.gifer.com/IPNp.gif',width = 200)
                 vAR_success_1 = vAR_st.success('Model testing completed')
 with col5:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if vAR_testing_data is not None:
             if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':             
@@ -810,9 +863,9 @@ with col5:
 
 
 #to display test code
-if vAR_problem != '':
-  if vAR_type != '':
-    if vAR_model != '':
+if vAR_problem != 'Select the Problem Statement':
+  if vAR_type != 'Select the Problem type':
+    if vAR_model != 'Select the Model':
       if vAR_training_data:
         if vAR_testing_data is not None:
           if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -828,9 +881,9 @@ if vAR_problem != '':
 
 col1, col2, col4 = vAR_st.columns([0.5,4,0.5])
 with col2:
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
         if vAR_training_data:
           if vAR_testing_data is not None:
             if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -845,55 +898,52 @@ with col2:
                   method = DecisionTreeClassifier
                   testing(method)
 
-vAR_st.markdown('#')
-vAR_st.markdown("""
-<hr style="width:100%;height:3px;background-color:gray">
-""", unsafe_allow_html=True)
 
-#vAR_st.markdown("""---""")
+
+vAR_st.markdown('#')
 if choice == "Home":
-  vAR_st.subheader("Go to the Menu")
+  pass
 
 if choice == "Model Validation":
-  vAR_st.subheader("Model Validation")
-  col1, col2, col4 = vAR_st.columns([2,4,4])
-  with col1:
+  col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
+  with col2:
+    vAR_st.subheader("Model Validation")
+  with col3:
     vAR_st.button("Click here", key="6")
 
 if choice == "Download Model Outcome":
-  vAR_st.subheader("To Download the Model Outcome")
-
-  col1, col2, col3 = vAR_st.columns([2,4,1])
-  with col1:
-    button_download = vAR_st.button("Click here", key="9")
-  if vAR_problem != '':
-    if vAR_type != '':
-      if vAR_model != '':
-        if vAR_training_data:
-          if vAR_testing_data is not None:
-            if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-              if button_download:
-                if vAR_model == "Logistic Regression":
-                  method = LogisticRegression
-                  download(method)
-                elif vAR_model == "Random Forest":
-                  method = RandomForestClassifier
-                  download(method)
-                elif vAR_model == "Decision Tree":
-                  method = DecisionTreeClassifier
-                  download(method)
+  col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
+  with col2:  
+    vAR_st.subheader("Download Model Outcome")
+  with col3:
+    if vAR_problem != 'Select the Problem Statement':
+      if vAR_type != 'Select the Problem type':
+        if vAR_model != 'Select the Model':
+          if vAR_training_data is not None:
+            if vAR_testing_data is not None:
+              if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                button_download = vAR_st.button("Click here", key="9")
+                if button_download:
+                  if vAR_model == "Logistic Regression":
+                    method = LogisticRegression
+                    download(method)
+                  elif vAR_model == "Random Forest":
+                    method = RandomForestClassifier
+                    download(method)
+                  elif vAR_model == "Decision Tree":
+                    method = DecisionTreeClassifier
+                    download(method)
                 
 
 if choice == "Data visualization":
-  vAR_st.subheader("Data visualization")
-  col1, col2, col3 = vAR_st.columns([2,4,1])
-  with col1:
+  col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
+  with col2:  
+    vAR_st.subheader("Data visualization")
+  with col3:
     visual_button = vAR_st.button("Visual Charts", key="8")
-  col1, col2, col3 = vAR_st.columns([2,1,2])
-  with col1:
-    if vAR_problem != '':
-      if vAR_type != '':
-        if vAR_model != '':
+    if vAR_problem != 'Select the Problem Statement':
+      if vAR_type != 'Select the Problem type':
+        if vAR_model != 'Select the Model':
           if vAR_training_data:
             if vAR_testing_data is not None:
               if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -913,9 +963,9 @@ if choice == "Data visualization":
 
 
   with col3:
-    if vAR_problem != '':
-      if vAR_type != '':
-        if vAR_model != '':
+    if vAR_problem != 'Select the Problem Statement':
+      if vAR_type != 'Select the Problem type':
+        if vAR_model != 'Select the Model':
           if vAR_training_data:
             if vAR_testing_data is not None:
               if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -935,9 +985,9 @@ if choice == "Data visualization":
 
   col1, col2, col3 = vAR_st.columns([1,3,1])
   with col2:
-    if vAR_problem != '':
-      if vAR_type != '':
-        if vAR_model != '':
+    if vAR_problem != 'Select the Problem Statement':
+      if vAR_type != 'Select the Problem type':
+        if vAR_model != 'Select the Model':
           if vAR_training_data:
             if vAR_testing_data is not None:
               if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -946,26 +996,29 @@ if choice == "Data visualization":
                     method = RandomForestClassifier
                     data = visual_graphs(method)
                     ch = data['Churn Prediction']
-                    cum = ch.cumsum()
+                    cum_churn = ch.cumsum()
                     visual_3(data)
                     visual_4(data)
                     visual_5(data)
+                    visual_6(data)
                   elif vAR_model == "Logistic Regression":
                     method = LogisticRegression
                     data = visual_graphs(method)
                     ch = data['Churn Prediction']
-                    cum = ch.cumsum()
+                    cum_churn = ch.cumsum()
                     visual_3(data)
                     visual_4(data)        
                     visual_5(data)
+                    visual_6(data)
                   elif vAR_model == "Decision Tree":
                     method = DecisionTreeClassifier
                     data = visual_graphs(method)
                     ch = data['Churn Prediction']
-                    cum = ch.cumsum()
+                    cum_churn = ch.cumsum()
                     visual_3(data)
                     visual_4(data)
                     visual_5(data)
+                    visual_6(data)
 
 
 if choice == "Deploy the Model":
@@ -978,9 +1031,9 @@ lib = vAR_st.sidebar.selectbox(" ",library)
 models_implemented = ['Models Implemented','Decision Tree','Random Forest','Logistic Regression']
 mi = vAR_st.sidebar.selectbox(" ",models_implemented)
 
-services = ["GCP Services Used","VM Instance","Compute Engine"]
+services = ["GCP Services Used","VM Instance","Compute Engine",'Cloud Storage']
 gcp = vAR_st.sidebar.selectbox(" ",services)
 
 
-href = f'<a style="color:black;" href="http://localhost:8501/" class="button">Clear/Reset</a>'
+href = f'<a style="color:black;" href="https://share.streamlit.io/tarun243/streamlit-commontoallindustry/Web_app/app.py/" class="button">Clear/Reset</a>'
 vAR_st.sidebar.markdown(href, unsafe_allow_html=True)
