@@ -8,7 +8,6 @@
 
 
 import streamlit as vAR_st
-import streamlit.components.v1 as components
 import pandas as pd
 from IPython.display import HTML
 import time
@@ -21,6 +20,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from lime import lime_tabular
+from streamlit import components
+import numpy as np
 
 #for Setting the page layout to wide
 vAR_st.set_page_config(layout="wide")
@@ -95,7 +97,7 @@ def training(method):
   training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
   #feature selection for training
-  training_data_features = training_data_features[['Customer Lifetime(Days)']]
+  training_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
   #Label for Training
   training_data_label = training_data[['Churn']]
@@ -113,7 +115,7 @@ def testing(method):
   training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
   #feature selection for training
-  training_data_features = training_data_features[['Customer Lifetime(Days)']]
+  training_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
   #Label for Training
   training_data_label = training_data[['Churn']]
@@ -126,8 +128,8 @@ def testing(method):
   test_data = df_testing
 
   #Feature Selection for Model Testing
-  test_data_features = test_data[['Customer Lifetime(Days)']]
-  test_data_features = training_data_features[['Customer Lifetime(Days)']]
+  test_data_features = test_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+  test_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
   #Model Testing
   model_testing = model.predict(test_data_features)
@@ -147,6 +149,64 @@ def testing(method):
   vAR_st.write(table_7)
   vAR_st.write('')
 
+  def explainable_ai():
+    # Explainable AI Implementation
+    vAR_st.write('')
+    vAR_st.write('')
+    vAR_st.subheader('Model Explainability with LIME package')
+    vAR_st.write('')
+    vAR_st.write('')
+    interpreter = lime_tabular.LimeTabularExplainer(
+    training_data=np.array(training_data_features),
+    feature_names=training_data_features.columns,
+    mode='classification'
+  )
+    exp = interpreter.explain_instance(
+    data_row=test_data_features.iloc[0], ##new data
+    predict_fn=model_training.predict_proba
+  )
+    components.v1.html(exp.as_html(), height=400)
+
+  explainable_ai()
+
+  
+
+
+# def explainable_ai(method):
+
+#   #training dataset
+#   training_data = df_training 
+#   training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+
+#   #feature selection for training
+#   training_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+
+#   #Label for Training
+#   training_data_label = training_data[['Churn']]
+
+#   #model training 
+#   model = method()
+#   model_training = model.fit(training_data_features,training_data_label)
+
+#   #Test Dataset
+#   test_data = df_testing
+
+#   #Feature Selection for Model Testing
+#   test_data_features = test_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+#   test_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+
+#   # Explainable AI Implementation
+#   interpretor = lime_tabular.LimeTabularExplainer(
+#   training_data=np.array(training_data_features),
+#   feature_names=training_data_features.columns,
+#   mode='classification'
+# )
+#   exp = interpretor.explain_instance(
+#   data_row=test_data_features.iloc[0], ##new data
+#   predict_fn=model_training.predict_proba
+# )
+#   components.v1.html(exp.as_html(), height=400)
+
 
 def test_code_log():
   with vAR_st.echo():
@@ -155,7 +215,7 @@ def test_code_log():
     training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
             
     #feature selection for training
-    training_data_features = training_data_features[['Customer Lifetime(Days)']]
+    training_data_features = training_data_features[['Customer Lifetime(Days)','Service Call','Service Failure Rate%','Price']]
 
     #Label for Training
     training_data_label = training_data[['Churn']]
@@ -169,7 +229,7 @@ def test_code_log():
 
     #Feature Selection for Model Testing
     test_data_features = test_data[['Customer Lifetime(Days)']]
-    test_data_features = training_data_features[['Customer Lifetime(Days)']]
+    test_data_features = training_data_features[['Customer Lifetime(Days)','Service Call','Service Failure Rate%','Price']]
 
     #Model Testing
     model_testing = model.predict(test_data_features)
@@ -252,7 +312,7 @@ def test_code_ran():
     training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
             
     #feature selection for training
-    training_data_features = training_data_features[['Customer Lifetime(Days)']]
+    training_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
     #Label for Training
     training_data_label = training_data[['Churn']]
@@ -265,8 +325,8 @@ def test_code_ran():
     test_data = df_testing
 
     #Feature Selection for Model Testing
-    test_data_features = test_data[['Customer Lifetime(Days)']]
-    test_data_features = training_data_features[['Customer Lifetime(Days)']]
+    test_data_features = test_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+    test_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
     #Model Testing
     model_testing = model.predict(test_data_features)
@@ -294,7 +354,7 @@ def train_code_ran():
       training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
             
       #feature selection for training
-      training_data_features = training_data_features[['Customer Lifetime(Days)']]
+      training_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
       #Label for Training
       training_data_label = training_data[['Churn']]
@@ -412,6 +472,8 @@ def download(method):
 
 #for visual charts
 def visual_6(data):
+  print('visual 6 - data - ',type(data))
+  print('visual 6 - data - ',data.columns)
   percentage = (cum_churn/60)*100
   fig = go.Figure(
     data=[go.Scatter(
@@ -1017,6 +1079,7 @@ with col5:
 
 
 
+
 #to display test code
 if vAR_problem != 'Select the Problem Statement':
   if vAR_type != 'Select the Problem type':
@@ -1057,6 +1120,48 @@ with col2:
                   method = DecisionTreeClassifier
                   testing(method)
 
+
+# # to display explainable ai
+# col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
+# with col1:
+#     vAR_st.write('')
+# with col4:
+#     vAR_st.write('')
+# with col2:
+#     if vAR_problem != 'Select the Problem Statement':
+#       if vAR_type != 'Select the Problem type':
+#         if vAR_model != 'Select the Model':
+#           if vAR_training_data:
+#             #time.sleep(10)
+#             vAR_st.write('')
+#             vAR_st.write('')
+#             vAR_st.markdown('#')
+#             vAR_st.subheader('Explainable AI')
+# with col3:
+#   if vAR_problem != 'Select the Problem Statement':
+#     if vAR_type != 'Select the Problem type':
+#       if vAR_model != 'Select the Model':
+#         if vAR_training_data:
+#           if vAR_testing_data is not None:
+#             if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 
+#               vAR_st.write('')
+#               vAR_st.write('')
+#               vAR_st.write('')
+#               vAR_st.write('')
+#               vAR_st.write('')
+#               button_test = vAR_st.button('Click Here to Know Prediction Explanation')
+#               if button_test:
+#                 if vAR_model == "Logistic Regression":
+#                   method = LogisticRegression
+#                   explainable_ai()
+#                 elif vAR_model == "Random Forest":
+#                   method = RandomForestClassifier
+#                   explainable_ai()
+#                 elif vAR_model == "Decision Tree":
+#                   method = DecisionTreeClassifier
+#                   explainable_ai()
+#                 else:
+#                   vAR_st.error('Please select the different model')
 
 
 vAR_st.markdown('#')
@@ -1183,7 +1288,7 @@ if choice == "Data visualization":
                     visual_3(data)
                     visual_4(data)
                     visual_5(data)
-                    visual_6(data)
+                    # visual_6(data)
                   elif vAR_model == "Logistic Regression":
                     method = LogisticRegression
                     data = visual_graphs(method)
@@ -1192,7 +1297,7 @@ if choice == "Data visualization":
                     visual_3(data)
                     visual_4(data)        
                     visual_5(data)
-                    visual_6(data)
+                    # visual_6(data)
                   elif vAR_model == "Decision Tree":
                     method = DecisionTreeClassifier
                     data = visual_graphs(method)
@@ -1201,7 +1306,7 @@ if choice == "Data visualization":
                     visual_3(data)
                     visual_4(data)
                     visual_5(data)
-                    visual_6(data)
+                    # visual_6(data)
 
 
 if choice == "Deploy the Model":
