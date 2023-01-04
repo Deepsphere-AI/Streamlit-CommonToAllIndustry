@@ -111,7 +111,7 @@ def training(method):
   training_data_label = training_data[['Churn']]
 
   #model training 
-  model = method()
+  model = method(random_state=42)
   model_training = model.fit(training_data_features,training_data_label)
 
   return model_training
@@ -131,8 +131,8 @@ def testing(method):
   training_data_label = training_data[['Churn']]
 
   #model training 
-  model = method()
-  model_training = model.fit(training_data_features,training_data_label)
+  # model = method()
+  model_training = training(method)
 
   #Test Dataset
   test_data = df_testing
@@ -142,7 +142,7 @@ def testing(method):
   test_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
   #Model Testing
-  model_testing = model.predict(test_data_features)
+  model_testing = model_training.predict(test_data_features)
   model_prediction = pd.DataFrame(model_testing)
   model_prediction = pd.DataFrame(model_testing,columns=['Churn Prediction'])
 
@@ -150,7 +150,7 @@ def testing(method):
   vAR_st.write('')
 
   #Getting the Probability of Churn
-  prediction_result_probability_all_features = model.predict_proba(test_data_features)
+  prediction_result_probability_all_features = model_training.predict_proba(test_data_features)
   prediction_result_probability_all_features = pd.DataFrame(prediction_result_probability_all_features,
     columns=['Probability of Non Churn', 'Probability of Churn'])
   churn_probability = prediction_result.merge(prediction_result_probability_all_features,
@@ -236,7 +236,7 @@ def explainable_ai(method):
 )
   components.v1.html(exp.as_html(), height=400)
   churn_probability_trunc = churn_probability.head(5)
-  with vAR_st.spinner('In-Progress'):
+  with vAR_st.spinner('Generating Prediction Explanation...'):
     vAR_exp_list = []
     for idx in range(0,5):
         exp = interpreter.explain_instance(
