@@ -235,10 +235,10 @@ def explainable_ai(method):
   predict_fn=model_training.predict_proba
 )
   components.v1.html(exp.as_html(), height=400)
-  churn_probability_trunc = churn_probability.head(5)
+  churn_probability_trunc = churn_probability.copy()
   with vAR_st.spinner('Generating Prediction Explanation...'):
     vAR_exp_list = []
-    for idx in range(0,5):
+    for idx in range(0,len(test_data_features)):
         exp = interpreter.explain_instance(
       data_row=test_data_features.iloc[idx], ##new data
       predict_fn=model_training.predict_proba
