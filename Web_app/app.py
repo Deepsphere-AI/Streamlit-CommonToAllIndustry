@@ -50,6 +50,7 @@ vAR_st.markdown("""<style>.css-1d391kg, .e1fqkh3o1 {
 </style>""", unsafe_allow_html=True)
 
 
+
 #for clear/reset button
 vAR_st.markdown("""<style>.button  
 {
@@ -83,6 +84,13 @@ div.stButton > button:first-child {border: 1px solid; width: 55%;
 }
 </style>""", unsafe_allow_html=True)
 
+m = vAR_st.markdown("""
+<style>
+div.stDownloadButton > button:first-child {border: 1px solid; width: 55%;
+    background-color: rgb(47 236 106) ;
+}
+</style>""", unsafe_allow_html=True)
+
 #for horizontal line
 vAR_st.markdown("""
 <hr style="width:100%;height:3px;background-color:gray;border-width:10">
@@ -105,6 +113,8 @@ def training(method):
   #model training 
   model = method()
   model_training = model.fit(training_data_features,training_data_label)
+
+  return model_training
 
 
 #for testing the model
@@ -149,64 +159,103 @@ def testing(method):
   vAR_st.write(table_7)
   vAR_st.write('')
 
-  def explainable_ai():
-    # Explainable AI Implementation
-    vAR_st.write('')
-    vAR_st.write('')
-    vAR_st.subheader('Model Explainability with LIME package')
-    vAR_st.write('')
-    vAR_st.write('')
-    interpreter = lime_tabular.LimeTabularExplainer(
-    training_data=np.array(training_data_features),
-    feature_names=training_data_features.columns,
-    mode='classification'
-  )
-    exp = interpreter.explain_instance(
-    data_row=test_data_features.iloc[0], ##new data
-    predict_fn=model_training.predict_proba
-  )
-    components.v1.html(exp.as_html(), height=400)
+  # def explainable_ai():
+  #   # Explainable AI Implementation
+  #   vAR_st.write('')
+  #   vAR_st.write('')
+  #   vAR_st.subheader('Model Explainability with LIME package')
+  #   vAR_st.write('')
+  #   vAR_st.write('')
+  #   interpreter = lime_tabular.LimeTabularExplainer(
+  #   training_data=np.array(training_data_features),
+  #   feature_names=training_data_features.columns,
+  #   mode='classification'
+  # )
+  #   exp = interpreter.explain_instance(
+  #   data_row=test_data_features.iloc[0], ##new data
+  #   predict_fn=model_training.predict_proba
+  # )
+  #   print('$$$ len- ',len(test_data_features))
+  #   components.v1.html(exp.as_html(), height=400)
 
-  explainable_ai()
+  #   for idx in range(0,len(test_data_features)):
+  #     exp = interpreter.explain_instance(
+  #   data_row=test_data_features.iloc[idx], ##new data
+  #   predict_fn=model_training.predict_proba
+  # )
+  #     vAR_st.write(str(test_data_features.iloc[idx]))
+  #     vAR_st.write(str(exp.as_list()))
+
+
+  # explainable_ai()
 
   
 
 
-# def explainable_ai(method):
+def explainable_ai(method):
 
-#   #training dataset
-#   training_data = df_training 
-#   training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+  model_training = training(method)
 
-#   #feature selection for training
-#   training_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+  #training dataset
+  training_data = df_training 
+  training_data_features = training_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
-#   #Label for Training
-#   training_data_label = training_data[['Churn']]
+  #Test Dataset
+  test_data = df_testing
 
-#   #model training 
-#   model = method()
-#   model_training = model.fit(training_data_features,training_data_label)
+  #Feature Selection for Model Testing
+  test_data_features = test_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+  test_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
 
-#   #Test Dataset
-#   test_data = df_testing
 
-#   #Feature Selection for Model Testing
-#   test_data_features = test_data[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
-#   test_data_features = training_data_features[['Quantity','Price','Service Call','Service Failure Rate%','Customer Lifetime(Days)']]
+  #Model Testing
+  model_testing = model_training.predict(test_data_features)
+  model_prediction = pd.DataFrame(model_testing)
+  model_prediction = pd.DataFrame(model_testing,columns=['Churn Prediction'])
 
-#   # Explainable AI Implementation
-#   interpretor = lime_tabular.LimeTabularExplainer(
-#   training_data=np.array(training_data_features),
-#   feature_names=training_data_features.columns,
-#   mode='classification'
-# )
-#   exp = interpretor.explain_instance(
-#   data_row=test_data_features.iloc[0], ##new data
-#   predict_fn=model_training.predict_proba
-# )
-#   components.v1.html(exp.as_html(), height=400)
+  prediction_result = test_data.merge(model_prediction,left_index=True,right_index=True)
+  vAR_st.write('')
 
+  #Getting the Probability of Churn
+  prediction_result_probability_all_features = model_training.predict_proba(test_data_features)
+  prediction_result_probability_all_features = pd.DataFrame(prediction_result_probability_all_features,
+    columns=['Probability of Non Churn', 'Probability of Churn'])
+  churn_probability = prediction_result.merge(prediction_result_probability_all_features,
+    left_index=True,right_index=True)
+
+
+  # Explainable AI Implementation
+  interpreter = lime_tabular.LimeTabularExplainer(
+  training_data=np.array(training_data_features),
+  feature_names=training_data_features.columns,
+  mode='classification'
+)
+  exp = interpreter.explain_instance(
+  data_row=test_data_features.iloc[0], ##new data
+  predict_fn=model_training.predict_proba
+)
+  components.v1.html(exp.as_html(), height=400)
+  churn_probability_trunc = churn_probability.head(5)
+  with vAR_st.spinner('In-Progress'):
+    vAR_exp_list = []
+    for idx in range(0,5):
+        exp = interpreter.explain_instance(
+      data_row=test_data_features.iloc[idx], ##new data
+      predict_fn=model_training.predict_proba
+    )
+        vAR_exp_list.append(str(exp.as_list()))
+    churn_probability_trunc['Explainable AI feature explanation'] = vAR_exp_list
+    vAR_st.dataframe(churn_probability_trunc)
+    churn_probability_trunc = churn_probability_trunc.to_csv().encode('utf-8')
+    return churn_probability_trunc
+
+
+# Used in streamlit<0.87
+# def download_explainable_ai_result(vAR_df):
+#   csv = vAR_df.to_csv(index=False)
+#   b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+#   href = f'<a href="data:file/csv;base64,{b64}" download="explainable-ai.csv">Download csv file</a>'
+#   return href
 
 def test_code_log():
   with vAR_st.echo():
@@ -1121,47 +1170,57 @@ with col2:
                   testing(method)
 
 
-# # to display explainable ai
-# col1, col2, col3, col4, col5 = vAR_st.columns([0.25,1.5,2.75,0.25,1.75])
-# with col1:
-#     vAR_st.write('')
-# with col4:
-#     vAR_st.write('')
-# with col2:
-#     if vAR_problem != 'Select the Problem Statement':
-#       if vAR_type != 'Select the Problem type':
-#         if vAR_model != 'Select the Model':
-#           if vAR_training_data:
-#             #time.sleep(10)
-#             vAR_st.write('')
-#             vAR_st.write('')
-#             vAR_st.markdown('#')
-#             vAR_st.subheader('Explainable AI')
-# with col3:
-#   if vAR_problem != 'Select the Problem Statement':
-#     if vAR_type != 'Select the Problem type':
-#       if vAR_model != 'Select the Model':
-#         if vAR_training_data:
-#           if vAR_testing_data is not None:
-#             if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 
-#               vAR_st.write('')
-#               vAR_st.write('')
-#               vAR_st.write('')
-#               vAR_st.write('')
-#               vAR_st.write('')
-#               button_test = vAR_st.button('Click Here to Know Prediction Explanation')
-#               if button_test:
-#                 if vAR_model == "Logistic Regression":
-#                   method = LogisticRegression
-#                   explainable_ai()
-#                 elif vAR_model == "Random Forest":
-#                   method = RandomForestClassifier
-#                   explainable_ai()
-#                 elif vAR_model == "Decision Tree":
-#                   method = DecisionTreeClassifier
-#                   explainable_ai()
-#                 else:
-#                   vAR_st.error('Please select the different model')
+# to display explainable ai
+col1, col2, col3 = vAR_st.columns([0.25,1.5,4.75])
+with col1:
+    vAR_st.write('')
+
+with col2:
+    if vAR_problem != 'Select the Problem Statement':
+      if vAR_type != 'Select the Problem type':
+        if vAR_model != 'Select the Model':
+          if vAR_training_data:
+            if vAR_testing_data is not None:
+              if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                #time.sleep(10)
+                vAR_st.write('')
+                vAR_st.write('')
+                vAR_st.markdown('#')
+                vAR_st.subheader('Explainable AI')
+with col3:
+  if vAR_problem != 'Select the Problem Statement':
+    if vAR_type != 'Select the Problem type':
+      if vAR_model != 'Select the Model':
+        if vAR_training_data:
+          if vAR_testing_data is not None:
+            if vAR_testing_data.type == 'application/vnd.ms-excel' or 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 
+              vAR_st.write('')
+              vAR_st.write('')
+              vAR_st.write('')
+              vAR_st.write('')
+              vAR_st.write('')
+              button_test = vAR_st.button('Click Here to Know the Prediction Explanation')
+              if button_test:
+                if vAR_model == "Logistic Regression":
+                  method = LogisticRegression
+                  churn_probability_trunc = explainable_ai(method)
+                  vAR_st.write('')
+                  vAR_st.write('')
+                  vAR_st.download_button(label='Download Explainable AI Outcome', data = churn_probability_trunc, file_name='explainable-ai.csv',mime='text/csv')
+                elif vAR_model == "Random Forest":
+                  method = RandomForestClassifier
+                  churn_probability_trunc = explainable_ai(method)
+                  vAR_st.write('')
+                  vAR_st.write('')
+                  vAR_st.download_button(label='Download Explainable AI Outcome', data = churn_probability_trunc, file_name='explainable-ai.csv',mime='text/csv')
+                elif vAR_model == "Decision Tree":
+                  method = DecisionTreeClassifier
+                  churn_probability_trunc = explainable_ai(method)
+                  vAR_st.write('')
+                  vAR_st.write('')
+                  vAR_st.download_button(label='Download Explainable AI Outcome', data = churn_probability_trunc, file_name='explainable-ai.csv',mime='text/csv')
+                else:
+                  vAR_st.error('Please select the different model')
 
 
 vAR_st.markdown('#')
